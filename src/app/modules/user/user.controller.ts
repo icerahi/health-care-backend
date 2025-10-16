@@ -43,8 +43,29 @@ const createAdmin = catchAsync(
   }
 );
 
+const getAllUsers = catchAsync(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const { page, limit, sortBy, sortOrder,searchTerm } = req.query;
+    const result = await userService.getAllUsers({
+      page: Number(page),
+      limit: Number(limit),
+      sortBy,
+      sortOrder,
+      searchTerm
+    });
+
+    sendResponse(res, {
+      success: true,
+      statusCode: status.OK,
+      message: "Users retrieve successfully",
+      data: result,
+    });
+  }
+);
+
 export const userController = {
   createPatient,
   createDoctor,
   createAdmin,
+  getAllUsers,
 };

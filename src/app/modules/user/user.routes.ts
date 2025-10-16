@@ -5,6 +5,8 @@ import { userValidation } from "./user.validation";
 
 const router = Router();
 
+router.get("/", userController.getAllUsers);
+
 router.post(
   "/create-patient",
 

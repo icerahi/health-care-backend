@@ -88,4 +88,37 @@ export class UserService {
     });
     return result;
   }
+
+  async getAllUsers({
+    page,
+    limit,
+    sortBy,
+    sortOrder,
+    searchTerm,
+  }: {
+    page: number;
+    limit: number;
+    sortBy: any;
+    sortOrder: any;
+    searchTerm?: string;
+  }) {
+    const pageNumber = page || 1;
+    const limitNumber = limit || 10;
+
+    const skip = (pageNumber - 1) * limitNumber;
+
+    const result = await prisma.user.findMany({
+      where: {
+        email: {
+          contains: searchTerm,
+          mode: "insensitive",
+        },
+      },
+      take: limitNumber,
+      skip,
+      orderBy:
+        sortBy && sortOrder ? { [sortBy]: sortOrder } : { createdAt: "desc" },
+    });
+    return result;
+  }
 }
