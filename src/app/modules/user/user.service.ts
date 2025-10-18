@@ -1,8 +1,11 @@
+import { Prisma } from "@prisma/client";
 import bcrypt from "bcryptjs";
 import { Request } from "express";
 import config from "../../../config";
 import { prisma } from "../../shared/prisma";
 import { fileUploader } from "../../utils/fileUploader";
+import { paginationHelper } from "../../utils/paginationHelper";
+import { userSearchableFields } from "./user.constant";
 
 export class UserService {
   //create patient
@@ -89,36 +92,58 @@ export class UserService {
     return result;
   }
 
-  async getAllUsers({
-    page,
-    limit,
-    sortBy,
-    sortOrder,
-    searchTerm,
-  }: {
-    page: number;
-    limit: number;
-    sortBy: any;
-    sortOrder: any;
-    searchTerm?: string;
-  }) {
-    const pageNumber = page || 1;
-    const limitNumber = limit || 10;
+  async getAllUsers(filters: any, options: any) {
+    const { page, limit, skip, sortBy, sortOrder } =
+      paginationHelper.calculatePagination(options);
 
-    const skip = (pageNumber - 1) * limitNumber;
+    const { searchTerm, ...filterData } = filters;
+
+    const andConditions: Prisma.UserWhereInput[] = [];
+
+    if (searchTerm) {
+      andConditions.push({
+        OR: userSearchableFields.map((field) => ({
+          [field]: {
+            contains: searchTerm,
+            mode: "insensitive",
+          },
+        })),
+      });
+    }
+
+    if (Object.keys(filterData).length > 0) {
+      andConditions.push({
+        AND: Object.keys(filterData).map((key) => ({
+          [key]: {
+            equals: (filterData as any)[key],
+          },
+        })),
+      });
+    }
+
+    const whereConditions: Prisma.UserWhereInput =
+      andConditions.length > 0 ? { AND: andConditions } : {};
 
     const result = await prisma.user.findMany({
-      where: {
-        email: {
-          contains: searchTerm,
-          mode: "insensitive",
-        },
-      },
-      take: limitNumber,
+      where: whereConditions,
+      take: limit,
       skip,
-      orderBy:
-        sortBy && sortOrder ? { [sortBy]: sortOrder } : { createdAt: "desc" },
+      orderBy: {
+        [sortBy]: sortOrder,
+      },
     });
-    return result;
+
+    const total = await prisma.user.count({ where: whereConditions });
+    const totalPages = Math.ceil(total / limit);
+
+    return {
+      meta: {
+        page,
+        limit,
+        total,
+        totalPages,
+      },
+      data: result,
+    };
   }
 }

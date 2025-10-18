@@ -1,7 +1,9 @@
 import { NextFunction, Request, Response } from "express";
-import status from "http-status";
+import httpStatus from "http-status";
 import catchAsync from "../../shared/catchAsync";
 import sendResponse from "../../shared/sendResponse";
+import { pick } from "../../utils/pick";
+import { userFilterableFields } from "./user.constant";
 import { UserService } from "./user.service";
 
 const userService = new UserService();
@@ -11,7 +13,7 @@ const createPatient = catchAsync(async (req: Request, res: Response) => {
 
   sendResponse(res, {
     success: true,
-    statusCode: status.CREATED,
+    statusCode: httpStatus.CREATED,
     message: "Patient created successfully",
     data: result,
   });
@@ -23,7 +25,7 @@ const createDoctor = catchAsync(
 
     sendResponse(res, {
       success: true,
-      statusCode: status.CREATED,
+      statusCode: httpStatus.CREATED,
       message: "Doctor created successfully",
       data: result,
     });
@@ -36,7 +38,7 @@ const createAdmin = catchAsync(
 
     sendResponse(res, {
       success: true,
-      statusCode: status.CREATED,
+      statusCode: httpStatus.CREATED,
       message: "Admin created successfully",
       data: result,
     });
@@ -45,20 +47,18 @@ const createAdmin = catchAsync(
 
 const getAllUsers = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
-    const { page, limit, sortBy, sortOrder,searchTerm } = req.query;
-    const result = await userService.getAllUsers({
-      page: Number(page),
-      limit: Number(limit),
-      sortBy,
-      sortOrder,
-      searchTerm
-    });
+ 
+    const filters = pick(req.query, userFilterableFields); //searching and filtering
+    const options = pick(req.query, ["page", "limit", "sortBy", "sortOrder"]);//paginatin and sorting
+
+    const result = await userService.getAllUsers(filters, options);
 
     sendResponse(res, {
       success: true,
-      statusCode: status.OK,
+      statusCode: httpStatus.OK,
       message: "Users retrieve successfully",
-      data: result,
+      meta: result.meta,
+      data: result.data,
     });
   }
 );
