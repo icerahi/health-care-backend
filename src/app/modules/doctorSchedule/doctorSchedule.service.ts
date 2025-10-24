@@ -19,6 +19,19 @@ const insertIntoDB = async (
   });
 };
 
+const mySchedules = async (user: IJWTPayload) => {
+  const schedules = await prisma.doctorSchedules.findMany({
+    where: {
+      doctor: {
+        email: user.email,
+      },
+    },
+  });
+
+  return schedules;
+};
+
 export const doctorScheduleService = {
   insertIntoDB,
+  mySchedules,
 };

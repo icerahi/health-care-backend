@@ -1,5 +1,7 @@
 import { Prisma } from "@prisma/client";
 import { addHours, addMinutes, format } from "date-fns";
+import status from "http-status";
+import ApiError from "../../errors/ApiError";
 import { prisma } from "../../shared/prisma";
 import { IJWTPayload } from "../../types/common";
 import { IOptions, paginationHelper } from "../../utils/paginationHelper";
@@ -23,6 +25,7 @@ const insertIntoDB = async (payload: any) => {
         Number(startTime.split(":")[1])
       )
     );
+
     const EndDateTime = new Date(
       addMinutes(
         addHours(
@@ -146,7 +149,7 @@ const schedulesForDoctor = async (
 const deleteScheduleFromDB = async (id: string) => {
   const schedule = await prisma.schedule.findUnique({ where: { id } });
   if (!schedule) {
-    throw new Error("Schedule not found!");
+    throw new ApiError(status.NOT_FOUND, "Schedule not found!");
   }
 
   return await prisma.schedule.delete({ where: { id } });

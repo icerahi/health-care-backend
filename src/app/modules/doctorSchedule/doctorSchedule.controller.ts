@@ -18,6 +18,21 @@ const insertIntoDB = catchAsync(
   }
 );
 
+const mySchedules = catchAsync(
+  async (req: Request & { user?: any }, res: Response) => {
+    const user = req.user;
+    const result = await doctorScheduleService.mySchedules(user);
+
+    sendResponse(res, {
+      success: true,
+      statusCode: status.OK,
+      message: "Doctor Schedule retreived Successfully",
+      data: result,
+    });
+  }
+);
+
 export const doctorScheduleController = {
   insertIntoDB,
+  mySchedules,
 };
