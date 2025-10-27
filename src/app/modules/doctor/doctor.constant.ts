@@ -7,12 +7,4 @@ export const doctorFilterableFields = [
   "searchTerm",
 ];
 
-export const doctorSearchableFields = [
-  "email",
-  "name",
-  "email",
-  "contactNumber",
-  "gender",
-  "appointmentFee",
-  "specialities",
-];
+export const doctorSearchableFields = ["email", "name", "contactNumber"];

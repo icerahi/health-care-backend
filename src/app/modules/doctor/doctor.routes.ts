@@ -3,6 +3,7 @@ import { doctorController } from "./doctor.controller";
 
 const router = Router();
 
-router.get("/doctor", doctorController.getAllFromDB);
+router.get("/", doctorController.getAllFromDB);
+router.patch("/:id", doctorController.updateIntoDB);
 
 export const doctorRoutes = router;

@@ -3,37 +3,35 @@ import status from "http-status";
 import catchAsync from "../../shared/catchAsync";
 import sendResponse from "../../shared/sendResponse";
 import { pick } from "../../utils/pick";
-import { doctorFilterableFields } from "./doctor.constant";
-import { doctorService } from "./doctor.service";
+import { patientFilterableFields } from "./patient.constant";
+import { patientService } from "./patient.service";
 
 const getAllFromDB = catchAsync(async (req: Request, res: Response) => {
+  const filters = pick(req.query, patientFilterableFields);
   const options = pick(req.query, ["page", "limit", "sortBy", "sortOrder"]);
-  const filters = pick(req.query, doctorFilterableFields);
 
-  const result = await doctorService.getAllFromDB(filters, options);
-
+  const result = await patientService.getAllFromDB(filters, options);
   sendResponse(res, {
     success: true,
     statusCode: status.OK,
-    message: "Doctor retreived Successfully",
+    message: "Doctors retreived Successfully",
     meta: result.meta,
     data: result.data,
   });
 });
-
 const updateIntoDB = catchAsync(async (req: Request, res: Response) => {
   const { id } = req.params;
-
-  const result = await doctorService.updateIntoDB(id, req.body);
+  const result = await patientService.updateIntoDB(id, req.body);
   sendResponse(res, {
     success: true,
     statusCode: status.OK,
-    message: "Doctor updated Successfully",
+    message: "Doctors updated Successfully",
+
     data: result,
   });
 });
 
-export const doctorController = {
+export const patientController = {
   getAllFromDB,
   updateIntoDB,
 };
